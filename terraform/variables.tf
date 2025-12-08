@@ -19,5 +19,5 @@ variable "instance_type" {
 variable "ami_id" {
 	description = "ID de la imagen Ubuntu 22.04"
 	type = string
-	default = "ami-0c398cb65a93047f2"
+	default = "ami-01872345de812817d"
 }
