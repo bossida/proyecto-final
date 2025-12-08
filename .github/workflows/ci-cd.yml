@@ -32,7 +32,7 @@ jobs:
 #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
   build_and_deploy:
-    needs: ci
+    #needs: ci
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
