@@ -61,3 +61,28 @@ jobs:
           docker push $IMAGE_URI
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to server via SSH (docker-compose pull & up)
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          env:
+            REGISTRY="${{ steps.ecr_login.outputs.registry }}"
+            IMAGE_URI=${REGISTRY}/w2p1k7q0/mundose:$GITHUB_SHA
+          run:
+            echo "Pulling image: $IMAGE_URI"
+          script: |
+            cd ~/deploy || mkdir -p ~/deploy && cd ~/deploy
+            cat > docker-compose.yml <<'EOF'
+            version: "3.8"
+            services:
+              app:
+                image: $IMAGE_URI
+                restart: always
+                ports:
+                  - "3000:3000"
+            EOF
+            docker-compose pull || true
+            docker-compose up -d --remove-orphans
