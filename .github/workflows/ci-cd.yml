@@ -54,7 +54,7 @@ jobs:
       - name: Build and push image to ECR (or DockerHub)
         run: |
           REGISTRY="${{ steps.ecr_login.outputs.registry }}"
-          IMAGE_URI=${REGISTRY}/tp_final/mundose_repository:$GITHUB_SHA
+          IMAGE_URI=${REGISTRY}/mundose:$GITHUB_SHA
           echo "Building image: $IMAGE_URI"
           docker build -t $IMAGE_URI .
           docker push $IMAGE_URI
