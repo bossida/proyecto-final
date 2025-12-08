@@ -71,7 +71,7 @@ jobs:
           env:
             REGISTRY="${{ steps.ecr_login.outputs.registry }}"
             IMAGE_URI=${REGISTRY}/w2p1k7q0/mundose:$GITHUB_SHA
-          run:
+          run: |
             echo "Pulling image: $IMAGE_URI"
           script: |
             cd ~/deploy || mkdir -p ~/deploy && cd ~/deploy
