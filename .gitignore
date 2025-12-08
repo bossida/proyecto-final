@@ -103,6 +103,7 @@ Thumbs.db
 # If you use a special file for secrets (e.g., prod.tfvars), you should ignore it.
 *.tfvars
 *.tfvars.json
+*.pem
 
 # 4. Terraform Plan Files
 # These are output files from 'terraform plan -out=...'
