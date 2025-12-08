@@ -68,13 +68,13 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          env:
+          envs:
             REGISTRY="${{ steps.ecr_login.outputs.registry }}"
             IMAGE_URI=${REGISTRY}/w2p1k7q0/mundose:$GITHUB_SHA
-          run: |
-            echo "Pulling image: $IMAGE_URI"
           script: |
-            cd ~/deploy || mkdir -p ~/deploy && cd ~/deploy
+            echo "Pulling image: $IMAGE_URI"
+            mkdir -p ~/deploy
+            cd ~/deploy
             cat > docker-compose.yml <<'EOF'
             version: "3.8"
             services:
@@ -84,5 +84,5 @@ jobs:
                 ports:
                   - "3000:3000"
             EOF
-            docker-compose pull || true
-            docker-compose up -d --remove-orphans
+            docker compose pull || true
+            docker compose up -d --remove-orphans
