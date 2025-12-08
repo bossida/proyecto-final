@@ -64,8 +64,7 @@ jobs:
 
       - name: Deploy to server via SSH (docker-compose pull & up)        
         env:
-           REGISTRY="${{ steps.ecr_login.outputs.registry }}"
-           IMAGE_URI=${REGISTRY}/w2p1k7q0/mundose:$GITHUB_SHA
+          IMAGE_URI=${{ steps.ecr_login.outputs.registry }}/w2p1k7q0/mundose:${{ github.sha }}
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
