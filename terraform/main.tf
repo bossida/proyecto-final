@@ -142,23 +142,14 @@ resource "aws_instance" "pp6_app" {
 
     # Update
     apt-get update -y
-    apt-get install -y ca-certificates curl gnupg lsb-release
 
-    # Add Docker GPG key
-    install -m 0755 -d /etc/apt/keyrings
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg |
-      tee /etc/apt/keyrings/docker.gpg >/dev/null
-    chmod a+r /etc/apt/keyrings/docker.gpg
-
-    # Add Docker repository
-    echo \
-      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
-      https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
-      | tee /etc/apt/sources.list.d/docker.list >/dev/null
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    sh get-docker.sh
 
     # Install Docker + Docker Compose v2
     apt-get update -y
-    apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    apt-get install docker-compose-plugin
+
 
     # Add ubuntu user to docker group
     usermod -aG docker ubuntu

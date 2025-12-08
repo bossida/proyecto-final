@@ -62,20 +62,21 @@ jobs:
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}
 
-      - name: Deploy to server via SSH (docker-compose pull & up)
+      - name: Deploy to server via SSH (docker-compose pull & up)        
+        env:
+           REGISTRY="${{ steps.ecr_login.outputs.registry }}"
+           IMAGE_URI=${REGISTRY}/w2p1k7q0/mundose:$GITHUB_SHA
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          envs:
-            REGISTRY="${{ steps.ecr_login.outputs.registry }}"
-            IMAGE_URI=${REGISTRY}/w2p1k7q0/mundose:$GITHUB_SHA
           script: |
-            echo "Pulling image: $IMAGE_URI"
+            IMAGE_URI="${{ env.IMAGE_URI }}"
+            echo "Pulling image:" $IMAGE_URI
             mkdir -p ~/deploy
             cd ~/deploy
-            cat > docker-compose.yml <<'EOF'
+            cat > docker-compose.yml <<EOF
             version: "3.8"
             services:
               app:
