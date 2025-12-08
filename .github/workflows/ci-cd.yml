@@ -53,8 +53,9 @@ jobs:
           #ECR_PUBLIC_ALIAS: ${{ secrets.ECR_PUBLIC_ALIAS }}
       - name: Build and push image to ECR (or DockerHub)
         run: |
-          REGISTRY=${ECR_REGISTRY}
+          REGISTRY="${{ steps.ecr_login.outputs.registry }}"
           IMAGE_URI=${REGISTRY}/${IMAGE_NAME}:$GITHUB_SHA
+          echo "Building image: $IMAGE_URI"
           docker build -t $IMAGE_URI .
           docker push $IMAGE_URI
         env:
