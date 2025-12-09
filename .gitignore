@@ -122,3 +122,18 @@ terraform.rc
 # to lock provider versions. Only ignore if you have a specific workflow reason.
 # **/.terraform.lock.hcl
 
+
+# NODE.JS DEPENDENCIES & ARTIFACTS
+# Ignore the node_modules folder at the project root
+/node_modules
+# Ignore common log files
+npm-debug.log*
+yarn-error.log*
+*.log
+# Ignore build outputs (if generated at the root)
+/dist
+/build
+
+# IDE AND OS FILES
+# General IDE/OS files
+/temp
