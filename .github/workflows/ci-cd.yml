@@ -40,11 +40,11 @@ jobs:
           name: coverage
           path: app/coverage
 
-#     - name: SonarQube Scan
-#       uses: sonarsource/sonarcloud-github-action@v1
-#       with:
-#         args: >
-#           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+      - name: SonarQube Scan
+        uses: sonarsource/sonarcloud-github-action@v1
+        with:
+          args: >
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 #     - name: Snyk Scan
 #       uses: snyk/actions/node@v2
 #       with:
