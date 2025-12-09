@@ -40,11 +40,12 @@ jobs:
           name: coverage
           path: app/coverage
 
+
       - name: SonarQube Scan
-        uses: sonarsource/sonarcloud-github-action@v1
-        with:
-          args: >
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+        uses: SonarSource/sonarqube-scan-action@v6.0.0  # Ex: v4.1.0 or sha1, See the latest version at https://github.com/marketplace/actions/official-sonarqube-scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
 #     - name: Snyk Scan
 #       uses: snyk/actions/node@v2
 #       with:
