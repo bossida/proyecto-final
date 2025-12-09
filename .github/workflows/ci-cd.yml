@@ -9,16 +9,37 @@ env:
   IMAGE_NAME: tp_final
 
 jobs:
-# ci:
-#   runs-on: ubuntu-latest
-#   steps:
-#     - uses: actions/checkout@v4
-#     - uses: actions/setup-node@v4
-#       with:
-#         node-version: '18'
-#     - run: npm ci
-#     - run: npm run lint
-#     - run: npm test
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install deps
+        run: npm ci
+        working-directory: ./app
+
+      - name: Lint
+        run: npm run lint
+        working-directory: ./app
+        continue-on-error: false
+
+      - name: Run tests
+        run: npm test -- --ci --reporter=jest-junit
+        working-directory: ./app 
+
+      - name: Upload coverage
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: app/coverage
+
 #     - name: SonarQube Scan
 #       uses: sonarsource/sonarcloud-github-action@v1
 #       with:
