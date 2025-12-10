@@ -128,13 +128,8 @@ resource "aws_key_pair" "pp6_key" {
 }
 
 # ECR repository para almacenar imágenes Docker
-resource "aws_ecr_repository" "app" {
-  name                 = var.ecr_repo_name
-  image_tag_mutability = "MUTABLE"
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
+resource "aws_ecrpublic_repository" "app" {
+  repository_name   = var.ecr_repo_name
 
   tags = {
     Name     = var.ecr_repo_name

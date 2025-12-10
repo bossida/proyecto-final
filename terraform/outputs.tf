@@ -21,5 +21,5 @@ output "clave_privada_ssh" {
 
 output "ecr_repository_url" {
   description = "URL del repositorio ECR (para hacer push/pull de imágenes)"
-  value       = aws_ecr_repository.app.repository_url
+  value       = aws_ecrpublic_repository.app.repository_uri
 }
