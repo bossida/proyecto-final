@@ -18,3 +18,8 @@ output "clave_privada_ssh" {
 	value = tls_private_key.pp6_key_pair.private_key_pem
 	sensitive = true
 }
+
+output "ecr_repository_url" {
+  description = "URL del repositorio ECR (para hacer push/pull de imágenes)"
+  value       = aws_ecr_repository.app.repository_url
+}

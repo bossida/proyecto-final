@@ -126,6 +126,22 @@ resource "aws_key_pair" "pp6_key" {
     Name = "pp6-clave-ssh"
   }
 }
+
+# ECR repository para almacenar imágenes Docker
+resource "aws_ecr_repository" "app" {
+  name                 = var.ecr_repo_name
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+
+  tags = {
+    Name     = var.ecr_repo_name
+    Proyecto = "TP-Final"
+    Ambiente = var.environment
+  }
+}
  
 # Instancia EC2
 resource "aws_instance" "pp6_app" {

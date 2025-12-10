@@ -21,3 +21,9 @@ variable "ami_id" {
 	type = string
 	default = "ami-01872345de812817d"
 }
+
+variable "ecr_repo_name" {
+  description = "Nombre del repositorio ECR para las imágenes Docker"
+  type        = string
+  default     = "mundose"
+}
