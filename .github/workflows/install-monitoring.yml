@@ -1,0 +1,96 @@
+name: Install Prometheus & Grafana (Manual)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  install_monitoring:
+    name: Install Prometheus and Grafana on EC2
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure secrets are present
+        run: |
+          : "EC2_HOST=${{ secrets.EC2_HOST }}" || true
+          : "EC2_USER=${{ secrets.EC2_USER }}" || true
+          : "EC2_SSH_KEY=${{ secrets.EC2_SSH_KEY }}" || true
+      - name: Install Prometheus & Grafana on EC2
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            echo "Running on: $(uname -a)"
+
+            # Install docker if missing (handles Debian/Ubuntu and Amazon Linux-ish)
+            if ! command -v docker >/dev/null 2>&1; then
+              echo "Docker not found. Installing";
+              if [ -f /etc/os-release ]; then . /etc/os-release; fi
+              if [ "${ID}" = "amzn" ] || grep -qi 'amzn' /etc/os-release 2>/dev/null || echo ${ID} | grep -qi 'fedora' >/dev/null 2>&1 ; then
+                sudo yum update -y || sudo yum -y check-update || true
+                sudo amazon-linux-extras install docker -y || sudo yum install -y docker || true
+                sudo systemctl enable docker || true
+                sudo systemctl start docker || true
+                sudo usermod -aG docker ${USER} || true
+              else
+                # default: Debian/Ubuntu
+                curl -fsSL https://get.docker.com | sudo sh
+                sudo systemctl enable docker || true
+                sudo systemctl start docker || true
+              fi
+            else
+              echo "Docker already installed";
+            fi
+
+            # Ensure docker-compose plugin exists
+            if ! docker compose version >/dev/null 2>&1; then
+              echo "docker compose plugin missing; trying to install docker compose plugin";
+              if [ -x "$(command -v apt-get)" ]; then
+                sudo apt-get update && sudo apt-get install -y docker-compose-plugin || true
+              fi
+            fi
+
+            # Pull images
+            sudo docker pull prom/prometheus:latest
+            sudo docker pull grafana/grafana:latest
+
+            # Stop & remove old containers if present
+            sudo docker rm -f prometheus || true
+            sudo docker rm -f grafana || true
+
+            # Create storage volume for Grafana
+            sudo docker volume create grafana-storage || true
+
+            # Prepare Prometheus config so it can scrape the Node app's /metrics endpoint
+            # We detect the machine's primary IP and configure that as Prometheus target:PORT
+            HOST_IP=$(hostname -I 2>/dev/null | awk '{print $1}' || echo "127.0.0.1")
+            echo "Detected host IP: $HOST_IP"
+            sudo mkdir -p /opt/prometheus || true
+            cat > /tmp/prometheus.yml <<EOF
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'nodejs-app'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['${HOST_IP}:3080']
+EOF
+            sudo mv /tmp/prometheus.yml /opt/prometheus/prometheus.yml
+
+            # Run Prometheus with the mounted configuration and Grafana normally
+            sudo docker rm -f prometheus || true
+            sudo docker run -d --name prometheus --restart=always -p 9090:9090 -v /opt/prometheus:/etc/prometheus prom/prometheus:latest || true
+            sudo docker run -d --name grafana --restart=always -p 3000:3000 -v grafana-storage:/var/lib/grafana grafana/grafana:latest || true
+
+            echo "Prometheus and Grafana started."
+
+      - name: Post-check - show running containers
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Ports}}\t{{.Status}}"
