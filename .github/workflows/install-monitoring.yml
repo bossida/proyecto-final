@@ -67,7 +67,7 @@ jobs:
             HOST_IP=$(hostname -I 2>/dev/null | awk '{print $1}' || echo "127.0.0.1")
             echo "Detected host IP: $HOST_IP"
             sudo mkdir -p /opt/prometheus || true
-            cat > /tmp/prometheus.yml <<'EOF'
+            cat > /tmp/prometheus.yml <<"EOF"
             global:
               scrape_interval: 15s
 
