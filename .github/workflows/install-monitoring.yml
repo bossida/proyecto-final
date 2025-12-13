@@ -67,16 +67,17 @@ jobs:
             HOST_IP=$(hostname -I 2>/dev/null | awk '{print $1}' || echo "127.0.0.1")
             echo "Detected host IP: $HOST_IP"
             sudo mkdir -p /opt/prometheus || true
-            cat > /tmp/prometheus.yml <<EOF
-global:
-  scrape_interval: 15s
+            cat > /tmp/prometheus.yml <<'EOF'
+            global:
+              scrape_interval: 15s
 
-scrape_configs:
-  - job_name: 'nodejs-app'
-    metrics_path: /metrics
-    static_configs:
-      - targets: ['${HOST_IP}:3080']
-EOF
+            scrape_configs:
+              - job_name: 'nodejs-app'
+                metrics_path: /metrics
+                static_configs:
+                  - targets: ['${HOST_IP}:3080']
+            EOF
+
             sudo mv /tmp/prometheus.yml /opt/prometheus/prometheus.yml
 
             # Run Prometheus with the mounted configuration and Grafana normally
