@@ -5,7 +5,7 @@ const swaggerJsdoc = require("swagger-jsdoc");
 const client = require("prom-client");
 
 const app = express();
-const PORT = 3090;
+const PORT = 3080;
 
 // Create a Registry which registers the metrics
 const register = new client.Registry();
@@ -133,4 +133,4 @@ app.get("/metrics", async (req, res) => {
   res.send(await register.metrics());
 });
 
-app.listen(3050, () => console.log("Server running on port 3000"));
+app.listen(PORT, () => console.log("Server running on port 3080"));

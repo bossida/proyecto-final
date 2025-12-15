@@ -2,8 +2,14 @@ name: CI/CD pipeline
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - 'terraform/**'
+      - 'docs/**'
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - 'terraform/**'
+      - 'docs/**'
 
 env:
   IMAGE_NAME: tp_final
