@@ -5,11 +5,13 @@ on:
     paths-ignore:
       - 'terraform/**'
       - 'docs/**'
+      - 'README.md'
   pull_request:
     branches: [ "main" ]
     paths-ignore:
       - 'terraform/**'
       - 'docs/**'
+      - 'README.md'
 
 env:
   IMAGE_NAME: tp_final
@@ -46,7 +48,17 @@ jobs:
           name: coverage
           path: app/coverage
 
+      - name: Generate SBOM
+        run: |
+            npx @cyclonedx/cyclonedx-npm --output-file sbom.json
 
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.json
+    
+          
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6.0.0  # Ex: v4.1.0 or sha1, See the latest version at https://github.com/marketplace/actions/official-sonarqube-scan
         env:
