@@ -72,12 +72,25 @@ jobs:
  #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
  #       continue-on-error: false
 
+#      - name: Snyk Scan
+#        uses: snyk/actions/node@master
+#        with:
+#          args: test --severity-threshold=high
+#        env:
+#          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+
       - name: Snyk Scan
-        uses: snyk/actions/node@master
-        with:
-          args: test --severity-threshold=high
+        uses: snyk/actions/node@v0.4.0
+        timeout-minutes: 3
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          CI: true
+        with:
+          args: >
+            --file=app/package.json
+            --severity-threshold=high
+            --no-progress    
 
   build_and_deploy:
     needs: ci
