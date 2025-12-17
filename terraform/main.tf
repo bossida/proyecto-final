@@ -37,48 +37,48 @@ resource "aws_vpc" "vpc_tp_final" {
 }
  
 # Crear una subnet pública
-resource "aws_subnet" "pp6_public_subnet" {
+resource "aws_subnet" "tpfinal_public_subnet" {
   vpc_id = aws_vpc.vpc_tp_final.id
   cidr_block = "10.0.1.0/24"
   availability_zone = "${var.aws_region}a"
   map_public_ip_on_launch = true
    
   tags = {
-    Name = "pp6-subnet-publica"
+    Name = "tpfinal-subnet-publica"
   }
 }
  
 # Crear un Internet Gateway
-resource "aws_internet_gateway" "pp6_igw" {
+resource "aws_internet_gateway" "tpfinal_igw" {
   vpc_id = aws_vpc.vpc_tp_final.id
    
   tags = {
-    Name = "pp6-internet-gateway"
+    Name = "tpfinal-internet-gateway"
   }
 }
  
 # Crear una tabla de ruteo
-resource "aws_route_table" "pp6_public_rt" {
+resource "aws_route_table" "tpfinal_public_rt" {
   vpc_id = aws_vpc.vpc_tp_final.id
    
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.pp6_igw.id
+    gateway_id = aws_internet_gateway.tpfinal_igw.id
   }
    
   tags = {
-    Name = "pp6-tabla-ruteo-publica"
+    Name = "tpfinal-tabla-ruteo-publica"
   }
 }
  
 # Asociar la subnet con la tabla de ruteo
-resource "aws_route_table_association" "pp6_public_rta" {
-  subnet_id = aws_subnet.pp6_public_subnet.id
-  route_table_id = aws_route_table.pp6_public_rt.id
+resource "aws_route_table_association" "tpfinal_public_rta" {
+  subnet_id = aws_subnet.tpfinal_public_subnet.id
+  route_table_id = aws_route_table.tpfinal_public_rt.id
 }
  
 # Grupo de seguridad
-resource "aws_security_group" "pp6_app_sg" {
+resource "aws_security_group" "tpfinal_app_sg" {
   name_prefix = "app-tp-final"
   description = "Grupo de seguridad para tp final"
   vpc_id = aws_vpc.vpc_tp_final.id
@@ -129,17 +129,17 @@ resource "aws_security_group" "pp6_app_sg" {
 }
  
 # Generar clave SSH automáticamente
-resource "tls_private_key" "pp6_key_pair" {
+resource "tls_private_key" "tpfinal_key_pair" {
   algorithm = "RSA"
   rsa_bits = 2048
 }
  
-resource "aws_key_pair" "pp6_key" {
-  key_name = "pp6-clave-ssh"
-  public_key = tls_private_key.pp6_key_pair.public_key_openssh
+resource "aws_key_pair" "tpfinal_key" {
+  key_name = "tpfinal-clave-ssh"
+  public_key = tls_private_key.tpfinal_key_pair.public_key_openssh
    
   tags = {
-    Name = "pp6-clave-ssh"
+    Name = "tpfinal-clave-ssh"
   }
 }
 
@@ -155,12 +155,12 @@ resource "aws_ecrpublic_repository" "app" {
 }
  
 # Instancia EC2
-resource "aws_instance" "pp6_app" {
+resource "aws_instance" "tpfinal_app" {
   ami = var.ami_id
   instance_type = var.instance_type
-  key_name = aws_key_pair.pp6_key.key_name
-  vpc_security_group_ids = [aws_security_group.pp6_app_sg.id]
-  subnet_id = aws_subnet.pp6_public_subnet.id
+  key_name = aws_key_pair.tpfinal_key.key_name
+  vpc_security_group_ids = [aws_security_group.tpfinal_app_sg.id]
+  subnet_id = aws_subnet.tpfinal_public_subnet.id
   associate_public_ip_address = true
    
   user_data = <<-EOF
@@ -187,7 +187,7 @@ resource "aws_instance" "pp6_app" {
   EOF
    
   tags = {
-    Name = "pp6-instancia-iac"
+    Name = "tpfinal-instancia-iac"
     Tipo = "Servidor-Aplicacion"
   }
 }
