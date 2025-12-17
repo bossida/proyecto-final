@@ -96,9 +96,6 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.get("/countries", async (req, res) => {
   const { name } = req.query;
 
-  foo = 123
-
-  
   if (!name) {
     return res.status(400).json({
       error: "Query parameter 'name' is required"
