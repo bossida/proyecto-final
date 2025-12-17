@@ -81,7 +81,7 @@ jobs:
 
 
       - name: Snyk Scan
-        uses: snyk/actions/node@v0.4.0
+        uses: snyk/actions/node@master
         timeout-minutes: 3
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
