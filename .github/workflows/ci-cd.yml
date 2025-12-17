@@ -65,19 +65,19 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
+ #     - name: Snyk Scan
+ #       run: npx snyk test --severity-threshold=high
+ #       working-directory: ./app
+ #       env:
+ #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+ #       continue-on-error: false
+
       - name: Snyk Scan
-        run: npx snyk test --severity-threshold=high
-        working-directory: ./app
+        uses: snyk/actions/node@master
+        with:
+          args: test --severity-threshold=high
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        continue-on-error: false
-
-#     - name: Snyk Scan
-#       uses: snyk/actions/node@v2
-#       with:
-#         args: test --severity-threshold=high
-#       env:
-#         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
   build_and_deploy:
     needs: ci
