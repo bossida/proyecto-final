@@ -122,7 +122,7 @@ jobs:
                 image: $IMAGE_URI
                 restart: always
                 ports:
-                  - "3080:3050"
+                  - "3080:3080"
             EOF
             docker compose pull || true
             docker compose up -d --remove-orphans
