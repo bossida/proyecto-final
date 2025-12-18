@@ -24,6 +24,12 @@ register.registerMetric(httpRequestCounter);
 
 // Middleware for counting requests
 app.use((req, res, next) => {
+  if (
+    req.path === "/metrics" ||
+    req.path.startsWith("/api-docs")
+  ) {
+    return next();
+  }
   res.on("finish", () => {
     httpRequestCounter.labels(req.method, req.path, res.statusCode).inc();
   });
