@@ -25,9 +25,10 @@ node index.js
 # npx nodemon index.js
 ```
 - La app expone:
-  - API: `http://localhost:3050/` (o el puerto definido en `app/index.js`)
-  - Swagger UI: `http://localhost:3050/api-docs`
-  - Metrics (Prometheus): `http://localhost:3050/metrics`
+  - API: `http://localhost:3080/` (o el puerto definido en `app/index.js`)
+  - Swagger UI: `http://localhost:3080/api-docs`
+  - Metrics (Prometheus): `http://localhost:9090/metrics`
+  
 
 **Tests**
 - Ejecutar tests (desde `app/`):
@@ -41,9 +42,8 @@ npm test
 ```bash
 # Desde la raíz del repo
 docker build -t mundose-local app
-docker run -p 3050:3050 mundose-local
+docker run -p 3080:3080 mundose-local
 ```
-- Asegúrate de que el `Dockerfile` copie/ejecute la app correctamente. Si el `Dockerfile` está en `app/`, usa `-f app/Dockerfile app`.
 
 **CI/CD (GitHub Actions)**
 - Archivo principal: `/.github/workflows/ci-cd.yml`.
@@ -59,14 +59,14 @@ docker run -p 3050:3050 mundose-local
 - `SERVER_HOST` (IP o hostname del servidor destino)
 - `SERVER_USER` (usuario SSH, por ejemplo `ubuntu`)
 - `SERVER_SSH_KEY` (clave privada SSH en formato PEM)
-- `SONAR_TOKEN` (si usas SonarQube)
-- Opcionales: `SNYK_TOKEN`, `ECR_PUBLIC_ALIAS`.
+- `SONAR_TOKEN` (token de SonarQube)
+- `SNYK_TOKEN` (para conectarse a Snyk)
 
 **Infraestructura con Terraform**
 - Carpeta: `terraform/`.
 - Recursos principales: VPC, Subnet pública, Internet Gateway, Route Table, Security Groups, EC2 instance, ECR public repository, key pair generado con `tls_private_key`.
-- El `user_data` de la instancia EC2 instala Docker y crea en `/home/ubuntu/monitoring` una `prometheus.yml` y un `docker-compose.yml` para levantar Prometheus y Grafana (Prometheus usa `network_mode: host` y Grafana se expone en el host `3001`).
-- Security groups: se creó un SG para la aplicación y otro para monitoreo (puerto 9090) — verifica y ajusta según tus necesidades.
+- El `user_data` de la instancia EC2 instala Docker.
+- Security groups: se creó un SG para la aplicación, otro para monitoreo (puerto 9090) y otro para Grafana (3000)
 
 Terraform: comandos comunes
 ```bash
@@ -77,31 +77,26 @@ terraform apply tfplan
 ```
 
 **Despliegue remoto (Cómo trabaja la Action)**
-- La job de deploy por SSH crea `~/deploy/docker-compose.yml` con el mapping de puertos definido en la Action. Por defecto el mapping actual es `"3080:3050"` (host:container). Si quieres exponer el contenedor en `3050` en la máquina host, cambia la línea a `"3050:3050"` en `/.github/workflows/ci-cd.yml`.
-- La instancia EC2 debe tener el Security Group apropiado abierto para el puerto que expones en host (por ejemplo 3080 o 3050) y para el puerto 9090 si quieres acceder a Prometheus desde fuera.
+- Ubicada en `/.github/workflows/ci-cd.yml`
+- La job de deploy por SSH crea `~/deploy/docker-compose.yml` y despliega la app nodejs en el puerto 3080.
+
 
 **Monitoreo (Prometheus + Grafana)**
-- Prometheus config base en `prometheus/prometheus.yml` (scrapea `localhost:3050` por defecto). Si Prometheus corre en `host` network, `localhost:3050` raspea la app expuesta en la instancia.
+- La creacion de Prometheus y Grafana se hace ejecuando en forma manual el job install-monitoring en .github\workflows. Una vez instalados se debe asociar Prometheus con Grafana e importar el dasboard de Grafana. 
 - URL por defecto (tras provisioning):
   - Prometheus: `http://<EC2_PUBLIC_IP>:9090`
-  - Grafana: `http://<EC2_PUBLIC_IP>:3001`
-- Recomendación: limitar acceso público al puerto 9090 usando CIDR restringido o habilitar un proxy con autenticación.
+  - Grafana: `http://<EC2_PUBLIC_IP>:3000`
 
-**Cambio de puertos y problemas comunes**
-- Si la app parece no responder en `3050`, verifica:
-  - Que la app sea mapeada al host en la Action `docker-compose` (host:container). Si la Action tiene `- "3080:3050"`, accede por `EC2:3080`.
-  - Que el Security Group en Terraform permita el puerto del host (no sólo el del container).
-  - Que el contenedor esté en ejecución con `docker ps` en la instancia remota.
 
-**Recomendaciones de seguridad**
-- No uses `0.0.0.0/0` para producción; restringe el acceso a IPs conocidas.
-- Protege el acceso a Prometheus y Grafana con autenticación o VPN.
-- Almacena las claves SSH y tokens en `GitHub Secrets` y no en el repo.
+**Aplicaciones expuestas al finalizar el deploy**
+- API: `http://<EC2_PUBLIC_IP>:3080/` Hello World 
+- Swagger UI: `http://<EC2_PUBLIC_IP>:3080/api-docs`
+- Metrics exporter Node : `http://<EC2_PUBLIC_IP>:3030/metrics`
+- Metrics (Prometheus): `http://<EC2_PUBLIC_IP>:9090/`
+- Metrics (Grafana): `http://<EC2_PUBLIC_IP>:3000`
 
-**Notas adicionales**
-- Si cambias el stack a Java/Spring Boot o a Gradle, puedo actualizar el workflow para usar `actions/setup-java` y `mvn`/`gradle`.
-- Si prefieres que Prometheus descubra contenedores por nombre, cambia `docker-compose` para usar una red común en lugar de `network_mode: host` y actualiza las reglas de scraping.
 
-**Contacto / Próximos pasos**
-- Puedo actualizar automáticamente el `Dockerfile` en `app/`, ajustar el mapping de puertos en `/.github/workflows/ci-cd.yml`, o añadir provisioning de Datasource/Dashboards en Grafana.
-- Indícame qué prefieres: mantener `3080:3050` (actual CI), o mover a `3050:3050` (exponer 3050 en host).
+**Curl API**
+- curl http://<EC2_PUBLIC_IP>:3080/countries?name=<NOMBRE_PAIS>
+- ej.  http://10.20.55.78:3080/countries?name=arg
+
