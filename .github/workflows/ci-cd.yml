@@ -61,24 +61,9 @@ jobs:
     
           
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v6.0.0  # Ex: v4.1.0 or sha1, See the latest version at https://github.com/marketplace/actions/official-sonarqube-scan
+        uses: SonarSource/sonarqube-scan-action@v6.0.0  
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
- #     - name: Snyk Scan
- #       run: npx snyk test --severity-threshold=high
- #       working-directory: ./app
- #       env:
- #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
- #       continue-on-error: false
-
-#      - name: Snyk Scan
-#        uses: snyk/actions/node@master
-#        with:
-#          args: test --severity-threshold=high
-#        env:
-#          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
 
       - name: Snyk Scan
         uses: snyk/actions/node@master
@@ -111,7 +96,7 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          #ECR_PUBLIC_ALIAS: ${{ secrets.ECR_PUBLIC_ALIAS }}
+
       - name: Build and push image to ECR (or DockerHub)
         run: |
           REGISTRY="${{ steps.ecr_login.outputs.registry }}"
